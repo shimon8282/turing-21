@@ -3,6 +3,9 @@
 \usepackage{booktabs}
 \usepackage{multirow}
 \usepackage{subfigure} 
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{multicol}
 
 %\def\argmax{\operatornamewithlimits{arg\,max}}
 %\def\argmin{\operatornamewithlimits{arg\,min}}
@@ -52,6 +55,16 @@
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Return:}}
 \renewcommand{\algorithmiccomment}[1]{// \textit{#1}}
+
+% Weighted QMIX commands
+\newcommand{\optimOper}{\ensuremath{\mathcal{T}^*}}
+\newcommand{\qmixOper}{\ensuremath{\mathcal{T}^*_{\text{Qmix}}}}
+\newcommand{\wOper}{\ensuremath{\mathcal{T}^*_{w}}}
+\newcommand{\wqmixOper}{\ensuremath{\mathcal{T}^*_{\text{WQMIX}}}}
+\newcommand{\qmixSpace}{\ensuremath{\mathcal{Q}^{mix}}}
+\newcommand{\qmixProj}{\ensuremath{\Pi_{\text{Qmix}}}}
+\newcommand{\wProj}{\ensuremath{\Pi_{w}}}
+
 
 \mode<presentation>
 {
@@ -644,6 +657,260 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 	\vspace{4mm}
 	\item Nonlinear mixing is not crucial (on SMAC)
 \end{itemize}
+}
+
+\frame{
+	\frametitle{Revisiting Representational Capacity}
+	\begin{center}
+		\includegraphics[width=0.7\textwidth]{Shimon}
+		\begin{itemize}
+			\item How important is this in general?
+		\end{itemize}
+	\end{center}
+}
+
+\frame{
+	\frametitle{Limitations of QMIX}
+	\begin{itemize}
+		\item We know QMIX cannot represent \textbf{all} possible joint-action $Q$-values.\\
+		\item Can have catastrophic consequences in the following situation:\\
+		(originally from [Son. et al 2019])
+	\end{itemize}
+	\begin{center}
+		\begin{tabular}{ | c | c | c |}
+			\hline
+			8 & -12 & -12 \\
+			\hline
+			-12 & 0 & 0 \\
+			\hline
+			-12 & 0 & 0 \\
+			\hline
+		\end{tabular}
+		~~~~~~~~~~~~
+		\begin{tabular}{ | c | c | c |}
+			\hline
+			-12 & -12 & -12 \\
+			\hline
+			-12 & 0 & 0 \\
+			\hline
+			-12 & 0 & 0 \\
+			\hline
+		\end{tabular}\\
+		\vspace{0.1cm}
+		% \includegraphics[width=0.7\textwidth]{qtran_matrixgame}\\
+		Matrix game payoffs \ \ \ \ \ \ \ \ \ \ What QMIX learns \ \
+	\end{center}
+	\begin{itemize}
+		\item Failure to recover the correct argmax!
+		\item Failure to recover the correct maximum $Q$-value!
+	\end{itemize}
+}
+
+
+\frame{
+	\frametitle{Fundamental Limitations of QMIX}
+	\begin{itemize}
+		\item These limitations are a problem because they are a \textbf{fundamental} part of QMIX.\\
+		\item We have deliberately chosen to factorise our joint-action $Q$-value in this manner.\\
+		\item Cannot get around these limitations by using bigger networks, more training, more compute, etc.\\
+	\end{itemize}
+	\begin{center}
+		$\implies$ Let's try and understand \textit{why} QMIX is failing.
+	\end{center}
+	
+}
+
+
+\frame{
+	\frametitle{Theoretical Framework for Analysing QMIX}
+	\begin{itemize}
+		\item Let's consider an \textit{idealised} version of QMIX.
+		\item We can do this through an \textit{operator}, that represents QMIX:
+	\end{itemize}
+	\begin{center}
+		$\mathcal{T}^*_{\text{Qmix}} := \overbrace{\Pi_{\text{Qmix}}}^{\textcolor{red}{\mathclap{\text{\emph{QMIX projection operator}}}}} \circ \underbrace{\mathcal{T}^*}_{\textcolor{blue}{\mathclap{\text{\emph{Standard Bellman Optimality Operator}}}}}$
+	\end{center}
+	\begin{itemize}
+		\item Where the projection is defined as:
+	\end{itemize}
+	\begin{center}
+		$\qmixProj Q := \argmin_{q \in \underbrace{\qmixSpace}_{\textcolor{red}{\mathclap{\text{\emph{$Q$s that QMIX can represent}}}}}} \sum_{\mathbf{u} \in \mathbf{U}} 
+(\overbrace{Q(s,\mathbf{u})}^{\textcolor{blue}{\mathclap{\text{\emph{Target $Q$s we are trying to learn}}}}} - q(s,\mathbf{u}))^2$
+	\end{center}
+}
+
+
+\frame{
+	\frametitle{Intuitions for why QMIX fails}
+	\begin{center}
+		$\qmixProj Q := \argmin_{q \in \qmixSpace} \sum_{\mathbf{u} \in \mathbf{U}} 
+(Q(s,\mathbf{u}) - q(s,\mathbf{u}))^2$
+	\end{center}
+	\begin{itemize}
+		\item We are weighting the error for \textbf{all} joint-actions equally in this idealised setting.
+	\end{itemize}
+	\begin{center}
+		\begin{tabular}{ | c | c | c |}
+			\hline
+			\bld{8} & -12 & -12 \\
+			\hline
+			-12 & 0 & 0 \\
+			\hline
+			-12 & 0 & 0 \\
+			\hline
+		\end{tabular}
+		~~~$\overset{\qmixProj}{\implies}$~~~
+		\begin{tabular}{ | c | c | c |}
+			\hline
+			\bld{-12} & -12 & -12 \\
+			\hline
+			-12 & 0 & 0 \\
+			\hline
+			-12 & 0 & 0 \\
+			\hline
+		\end{tabular}\\
+		\vspace{0.1cm}
+		\ \ \ \ \ \ \ \ \ \ $Q$ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \  \ \ \ \ \ \ \ $\argmin_{q \in \qmixSpace}$ \ \ \ 
+	\end{center}
+	\begin{itemize}
+		\item Hence we fail on this simple matrix game.
+	\end{itemize}
+	
+}
+\frame{
+	\frametitle{Hypothetical}
+	\begin{itemize}
+		\item Lets consider a what happens if we \textbf{only} considered the error of the optimal joint-action.
+	\end{itemize}
+	\begin{center}
+		\begin{tabular}{ | c | c | c |}
+			\hline
+			\bld{8} & -12 & -12 \\
+			\hline
+			-12 & 0 & 0 \\
+			\hline
+			-12 & 0 & 0 \\
+			\hline
+		\end{tabular}
+		~~~~$\implies$~~~~
+		\begin{tabular}{ | c | c | c |}
+			\hline
+			\bld{8} & ? & ? \\
+			\hline
+			? & ? & ? \\
+			\hline
+			? & ? & ? \\
+			\hline
+		\end{tabular}\\
+	\end{center}
+	\begin{itemize}
+		\item For a single joint-action, the representational limitations of QMIX have no affect.
+		\item Ideally, we also want to learn $Q$-values for the other joint-actions that are below.
+	\end{itemize}
+
+}
+
+\frame{
+	\frametitle{Weighting Function}
+	\begin{itemize}
+		\item Based on that intuition, we can introduce a weighting function into our objective:
+	\end{itemize}
+	\begin{center}
+		$\wProj Q := \argmin_{q \in \qmixSpace} \sum_{\mathbf{u} \in \mathbf{U}} \underbrace{\textcolor{red}{w(s,\mathbf{u})}}_{\mathclap{\text{\bld{Weighting function}}}}(Q(s,\mathbf{u}) - q(s,\mathbf{u}))^2$
+	\end{center}
+	\begin{itemize}
+		\item The weighting changes the $q \in \qmixSpace$ that is returned.
+	\end{itemize}
+}
+
+
+\frame{
+	\frametitle{Candidates for the Weighting Functions}
+	\begin{itemize}
+		\item Idealised Central Weighting:
+	\end{itemize}
+	\begin{multicols}{2}
+		\begin{equation*}
+		    w(s,\mathbf{u}) = 
+		    \begin{cases}
+		    % 1 & Q_{critic}(s,\mathbf{u}) > Q_{critic}(s,\mathbf{u}^*) ~~\text{or}~~ \mathbf{u} = \mathbf{u}^* \\
+		    1 & \mathbf{u} = \argmax_{\mathbf{u}} Q(s,\mathbf{u})\\
+		    \alpha & \text{otherwise}.
+		    \end{cases}
+		\end{equation*}
+	\columnbreak
+	\begin{itemize}
+		\item Not a practical weighting
+		\item Needs approximation in experiments
+	\end{itemize}
+	\end{multicols}
+
+	\begin{itemize}
+		\item Optimistic Weighting:
+	\end{itemize}
+	\begin{multicols}{2}
+		\begin{equation*}
+			w(s,\mathbf{u}) = 
+		    \begin{cases}
+			    1 & Q_{tot}(s,\mathbf{u}) < Q(s,\mathbf{u}) \\
+			    \alpha & \text{otherwise}.
+		    \end{cases}
+		\end{equation*}
+	\columnbreak
+	\begin{itemize}
+		\item Easy to use in experiments
+		\item Less obvious it works
+	\end{itemize}
+	\end{multicols}
+	Have theoretical results for both providing a firm foundation.
+}
+
+\frame{
+	\frametitle{Weighted QMIX}
+	There are 3 components to Weighted QMIX:\\
+	\begin{itemize}
+		\item QMIX's $Q$-values: $Q_{tot}$.
+			\begin{itemize}
+				\item Produces the decentralised agents.
+				\item Used to efficiently maximise.
+			\end{itemize}
+		\item Weighted QMIX loss.
+			\begin{itemize}
+				\item Changes the $Q_{tot}$ learnt by QMIX.
+				\item Ensures we recover the correct argmax action and correct maximum $Q$-value.
+			\end{itemize}
+		\item Centralised $Q$-values: $\hat{Q}^*$.
+			\begin{itemize}
+				\item Unrestricted joint-action $Q$-value.
+				\item Used to estimate $Q$-values.
+			\end{itemize}
+	\end{itemize}
+}
+
+
+\frame{
+	\frametitle{Deep RL Weighted QMIX}
+	
+}
+
+\frame{
+	\frametitle{Predator Prey Results}
+	
+}
+
+\frame{
+	\frametitle{Robustness to Exploration Results}
+	
+}
+
+\frame{
+	\frametitle{Limitations}
+
+}
+
+\frame{
+	\frametitle{IGM and Future Directions}
+
 }
 
 \frame{
