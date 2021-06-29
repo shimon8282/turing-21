@@ -890,26 +890,59 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 
 \frame{
 	\frametitle{Deep RL Weighted QMIX}
-	
+	\begin{itemize}
+		\item Ultimately, we are interested in the Deep MARL setting.
+		\item Our analysis provides a firm theoretical foundation to build on top off.
+		\item How can we realise Weighted QMIX in practise?
+	\end{itemize}
+	\begin{center}
+		\includegraphics[width=1\textwidth]{wqmix_targets.png}
+	\end{center}
 }
 
 \frame{
-	\frametitle{Predator Prey Results}
-	
+	\frametitle{Predator Prey}
+	\begin{itemize}
+		\item \bld{TODO: Add description of reward structure}
+	\end{itemize}
+	\begin{center}
+		\includegraphics[width=0.8\textwidth]{wqmix_predprey_test_return.png}
+	\end{center}
 }
 
 \frame{
 	\frametitle{Robustness to Exploration Results}
-	
+	\begin{itemize}
+		\item QMIX can be particularly brittle in the presence of significant exploration.
+	\end{itemize} 
+	\begin{center}
+		\includegraphics[width=0.8\textwidth]{wqmix_3s5z_robustness_epsilon.png}
+	\end{center}
 }
 
 \frame{
 	\frametitle{Limitations}
+	\begin{itemize}
+		\item Weighted QMIX introduces additional complexity to the method:
+			\begin{itemize}
+				\item Additional model we must now think about
+				\item Weighting function into our loss
+			\end{itemize}
+		\item This extra complexity can lead to \textit{regressions} in performance compared to QMIX.
+	\end{itemize} 
+	\begin{center}
+		\includegraphics[width=0.8\textwidth]{wqmix_corridor_limitations.png}
+	\end{center}
 
 }
 
 \frame{
-	\frametitle{IGM and Future Directions}
+	\frametitle{Future Directions/Questions}
+	\begin{itemize}
+		\item Our choice of weightings for Deep RL is relatively arbitrary.
+		\item Architecture/training of the centralised $\hat{Q}^*$ is lacking.
+		\item Why doesn't something like QPLEX work in our Predator Prey?
+	\end{itemize} 
 
 }
 
