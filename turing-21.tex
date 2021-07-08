@@ -79,8 +79,7 @@
 %\logo{\pgfuseimage{institution-logo}}
 
 \title[Factored VFs for Cooperative MARL]{Factored Value Functions for Cooperative Multi-Agent Reinforcement Learning}
-\author[Whiteson \& Rashid (Oxford)]{Shimon Whiteson \& Tabish Rashid \\ Dept.\ of Computer Science \\ University of Oxford \\ \ \\ joint work with Jakob Foerster, Gregory Farquhar, Anuj Mahajan,\\ Mikayel Samvelyan, Christian Schroeder de Witt,
-Nantas Nardelli,\\ Tim Rudner, Chia-Man Hung, and Phil Torr}
+\author[Whiteson \& Rashid (Oxford)]{Shimon Whiteson \& Tabish Rashid \\ Dept.\ of Computer Science \\ University of Oxford \\ \ \\ joint work with Jakob Foerster, Gregory Farquhar, Bei Peng,\\ Mikayel Samvelyan, and Christian Schroeder de Witt}
 \date{\today}
 
 \begin{document}
@@ -196,32 +195,32 @@ Nantas Nardelli,\\ Tim Rudner, Chia-Man Hung, and Phil Torr}
 %\end{itemize}
 %}
 
-\frame{
-\frametitle{Multi-Agent RL Methods from WhiRL}
-%%%%%%%%%%%%%%%%%
-
-\begin{itemize}
-	\item DIAL [Foerster et al.\ 2015]
-	\vspace{0.11cm}
-	\item Multi-Agent Fingerprints [Foerster et al.\ 2017]
-	\vspace{0.1cm}
-	\item COMA [Foerster et al.\ 2018]
-	\vspace{0.1cm}
-	\item \bld{QMIX [Rashid et al.\ 2018]}
-	\vspace{0.1cm}
-	\item LOLA [Foerster et al.\ 2019]
-	\vspace{0.1cm}
-	\item SOS [Letcher et al.\ 2019]
-	\vspace{0.1cm}
-	\item MACKRL [Schroeder de Witt et al.\ 2019]
-	\vspace{0.1cm}
-	\item MAVEN [Mahajan et al.\ 2019]
-	\vspace{0.1cm}
-	\item \bld{WQMIX [Rashid et al.\ 2020]}
-	\vspace{0.1cm}
-	\item COMIX [Schroeder de Witt et al.\ 2020]
-\end{itemize}
-}
+%\frame{
+%\frametitle{Multi-Agent RL Methods from WhiRL}
+%%%%%%%%%%%%%%%%%%
+%
+%\begin{itemize}
+%	\item DIAL [Foerster et al.\ 2015]
+%	\vspace{0.11cm}
+%	\item Multi-Agent Fingerprints [Foerster et al.\ 2017]
+%	\vspace{0.1cm}
+%	\item COMA [Foerster et al.\ 2018]
+%	\vspace{0.1cm}
+%	\item \bld{QMIX [Rashid et al.\ 2018]}
+%	\vspace{0.1cm}
+%	\item LOLA [Foerster et al.\ 2019]
+%	\vspace{0.1cm}
+%	\item SOS [Letcher et al.\ 2019]
+%	\vspace{0.1cm}
+%	\item MACKRL [Schroeder de Witt et al.\ 2019]
+%	\vspace{0.1cm}
+%	\item MAVEN [Mahajan et al.\ 2019]
+%	\vspace{0.1cm}
+%	\item \bld{WQMIX [Rashid et al.\ 2020]}
+%	\vspace{0.1cm}
+%	\item COMIX [Schroeder de Witt et al.\ 2020]
+%\end{itemize}
+%}
 
 \frame{
 \frametitle{Setting}
@@ -662,19 +661,19 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 \frame{
 	\frametitle{Revisiting Representational Capacity}
 	\begin{center}
-		\includegraphics[width=0.7\textwidth]{Shimon}
-		\begin{itemize}
-			\item How important is this in general?
-		\end{itemize}
+		\includegraphics[width=0.7\textwidth]{Shimon}\\ \ \\
+%		\begin{itemize}
+			%\item 
+			How important is this in general?
+%		\end{itemize}
 	\end{center}
 }
 
 \frame{
 	\frametitle{Limitations of QMIX}
 	\begin{itemize}
-		\item We know QMIX cannot represent \textbf{all} possible joint-action $Q$-values.\\
-		\item Can have catastrophic consequences in the following situation:\\
-		(originally from [Son. et al 2019])
+		\item QMIX cannot represent \textbf{all} possible joint-action $Q$-values\\
+		\item Can have catastrophic consequences:
 	\end{itemize}
 	\begin{center}
 		\begin{tabular}{ | c | c | c |}
@@ -698,7 +697,8 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 		\end{tabular}\\
 		\vspace{0.1cm}
 		% \includegraphics[width=0.7\textwidth]{qtran_matrixgame}\\
-		Matrix game payoffs \ \ \ \ \ \ \ \ \ \ What QMIX learns \ \
+		Matrix game payoffs \ \ \ \ \ \ \ \ \ \ What QMIX learns \ \ \\ \ \\
+		(Example from [Son. et al 2019])
 	\end{center}
 	\begin{itemize}
 		\item Failure to recover the correct argmax!
@@ -710,12 +710,15 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 \frame{
 	\frametitle{Fundamental Limitations of QMIX}
 	\begin{itemize}
-		\item These limitations are a problem because they are a \textbf{fundamental} part of QMIX.\\
-		\item We have deliberately chosen to factorise our joint-action $Q$-value in this manner.\\
-		\item Cannot get around these limitations by using bigger networks, more training, more compute, etc.\\
+		\item These limitations are \textbf{fundamental} to QMIX\\
+		\vspace{3mm}
+		\item Consequence of deliberate factorisation of the joint $Q$-function\\
+		\vspace{3mm}
+		\item Not resolved with bigger networks, more training, more compute, etc.\\
+		\vspace{3mm}
 	\end{itemize}
 	\begin{center}
-		$\implies$ Let's try and understand \textit{why} QMIX is failing.
+		$\implies$ Let's try and understand \textit{why} QMIX is failing
 	\end{center}
 	
 }
@@ -724,14 +727,13 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 \frame{
 	\frametitle{Theoretical Framework for Analysing QMIX}
 	\begin{itemize}
-		\item Let's consider an \textit{idealised} version of QMIX.
-		\item We can do this through an \textit{operator}, that represents QMIX:
-	\end{itemize}
+		\item Consider an \textit{idealised} version of QMIX
+		\item Use an \textit{operator} that represents QMIX:
 	\begin{center}
 		$\mathcal{T}^*_{\text{Qmix}} := \overbrace{\Pi_{\text{Qmix}}}^{\textcolor{red}{\mathclap{\text{\emph{QMIX projection operator}}}}} \circ \underbrace{\mathcal{T}^*}_{\textcolor{blue}{\mathclap{\text{\emph{Standard Bellman Optimality Operator}}}}}$
 	\end{center}
-	\begin{itemize}
-		\item Where the projection is defined as:
+	\vspace{2mm}
+		where the projection is defined as:
 	\end{itemize}
 	\begin{center}
 		$\qmixProj Q := \argmin_{q \in \underbrace{\qmixSpace}_{\textcolor{red}{\mathclap{\text{\emph{$Q$s that QMIX can represent}}}}}} \sum_{\mathbf{u} \in \mathbf{U}} 
@@ -741,13 +743,13 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 
 
 \frame{
-	\frametitle{Intuitions for why QMIX fails}
+	\frametitle{Why QMIX Fails}
 	\begin{center}
 		$\qmixProj Q := \argmin_{q \in \qmixSpace} \sum_{\mathbf{u} \in \mathbf{U}} 
 (Q(s,\mathbf{u}) - q(s,\mathbf{u}))^2$
 	\end{center}
 	\begin{itemize}
-		\item We are weighting the error for \textbf{all} joint-actions equally in this idealised setting.
+		\item QMIX weights the error for \textbf{all} joint actions equally
 	\end{itemize}
 	\begin{center}
 		\begin{tabular}{ | c | c | c |}
@@ -773,14 +775,14 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 		\ \ \ \ \ \ \ \ \ \ $Q$ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \  \ \ \ \ \ \ \ $\argmin_{q \in \qmixSpace}$ \ \ \ 
 	\end{center}
 	\begin{itemize}
-		\item Hence we fail on this simple matrix game.
+		\item Result is failure on this simple matrix game
 	\end{itemize}
 	
 }
 \frame{
 	\frametitle{Hypothetical}
 	\begin{itemize}
-		\item What happens if we \textbf{only} considered the error of the optimal joint-action?
+		\item What if we \textbf{only} consider error on the optimal joint action?
 	\end{itemize}
 	\begin{center}
 		\begin{tabular}{ | c | c | c |}
@@ -804,8 +806,8 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 		\end{tabular}\\
 	\end{center}
 	\begin{itemize}
-		\item For a single joint-action, the representational limitations of QMIX have no affect.
-		\item Ideally, we also want to learn $Q$-values for the other joint-actions that are below the optimal action's $Q$.
+		\item For a single joint action, QMIX's limitations have no effect
+		\item Ideally, we also want to learn $Q$-values for the other joint-actions that are below the optimal action's $Q$ \sw{This doesn't seem right: we *need* to estimate those other joint values in oder to know which joint action is optimal in the first place.}
 	\end{itemize}
 
 }
@@ -813,21 +815,22 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 \frame{
 	\frametitle{Weighting Function}
 	\begin{itemize}
-		\item Based on that intuition, we can introduce a weighting function into our objective:
+		\item Introduce a weighting function into our objective:
 	\end{itemize}
 	\begin{center}
 		$\wProj Q := \argmin_{q \in \qmixSpace} \sum_{\mathbf{u} \in \mathbf{U}} \underbrace{\textcolor{red}{w(s,\mathbf{u})}}_{\mathclap{\text{\bld{Weighting function}}}}(Q(s,\mathbf{u}) - q(s,\mathbf{u}))^2$
 	\end{center}
 	\begin{itemize}
-		\item The weighting changes the $q \in \qmixSpace$ that is returned.
+		\item The weighting changes the $q \in \qmixSpace$ that is returned
 	\end{itemize}
 }
 
 
 \frame{
 	\frametitle{Candidates for the Weighting Functions}
+\sw{Can you improve the alignment on this slide?}
 	\begin{itemize}
-		\item Idealised Central Weighting:
+		\item Idealised Central Weighting: 
 	\end{itemize}
 	\begin{multicols}{2}
 		\begin{equation*}
@@ -840,8 +843,8 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 		\end{equation*}
 	\columnbreak
 	\begin{itemize}
-		\item Not a practical weighting
-		\item Needs approximation in experiments
+		\item Not practical 
+		\item Requires approximation
 	\end{itemize}
 	\end{multicols}
 
@@ -858,43 +861,50 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 		\end{equation*}
 	\columnbreak
 	\begin{itemize}
-		\item Easy to use in experiments
+		\item Easy to use
 		\item Less obvious it works
 	\end{itemize}
 	\end{multicols}
-	Have theoretical results for both providing a firm foundation.
+\begin{itemize}
+	\item Theoretical results apply to both
+\end{itemize}
+
 }
 
 \frame{
 	\frametitle{Weighted QMIX}
-	There are 3 components to Weighted QMIX:\\
-	\begin{itemize}
-		\item QMIX's $Q$-values: $Q_{tot}$.
+	Three components of Weighted QMIX:\\
+	\vspace{2mm}
+	\begin{enumerate}
+		\item QMIX's $Q$-values: $Q_{tot}$
 			\begin{itemize}
-				\item Produces the decentralised agents.
-				\item Used to efficiently maximise.
+				\item Produces the decentralised agents
+				\item Used to efficiently maximise
 			\end{itemize}
+	\vspace{2mm}
 		\item Weighted QMIX loss.
 			\begin{itemize}
-				\item Changes the $Q_{tot}$ learnt by QMIX.
-				\item Ensures we recover the correct argmax action and correct maximum $Q$-value.
+				\item Changes the $Q_{tot}$ learnt by QMIX
+				\item Ensures correct argmax action and correct maximum $Q$-value
 			\end{itemize}
-		\item Centralised $Q$-values: $\hat{Q}^*$.
+	\vspace{2mm}
+		\item Centralised $Q$-values: $\hat{Q}^*$
 			\begin{itemize}
-				\item Unrestricted joint-action $Q$-value.
-				\item Used to estimate $Q$-values.
+				\item Unrestricted joint action $Q$-value
+				\item Used to estimate $Q$-values
 			\end{itemize}
-	\end{itemize}
+	\end{enumerate}
 }
 
 
 \frame{
 	\frametitle{Deep RL Weighted QMIX}
-	\begin{itemize}
-		\item Ultimately, we are interested in the Deep MARL setting.
-		\item Our analysis provides a firm theoretical foundation to build on top off.
-		\item How can we realise Weighted QMIX in practise?
-	\end{itemize}
+%SW: mention the points below when you speak but you don't need them on the slide
+%	\begin{itemize}
+%		\item Ultimately, we are interested in the Deep MARL setting
+%		\item Our analysis provides a firm theoretical foundation to build on 
+%		\item How can we realise Weighted QMIX in practise?
+%	\end{itemize}
 	\begin{center}
 		\includegraphics[width=1\textwidth]{wqmix_targets.png}
 	\end{center}
@@ -912,9 +922,10 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 
 \frame{
 	\frametitle{Robustness to Exploration Results}
-	\begin{itemize}
-		\item QMIX can be particularly brittle in the presence of significant exploration.
-	\end{itemize} 
+	%\begin{itemize}
+		%\item 
+		QMIX can be brittle in the presence of significant exploration
+%	\end{itemize} 
 	\begin{center}
 		\includegraphics[width=0.8\textwidth]{wqmix_3s5z_robustness_epsilon.png}
 	\end{center}
@@ -923,12 +934,12 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 \frame{
 	\frametitle{Limitations}
 	\begin{itemize}
-		\item Weighted QMIX introduces additional complexity to the method:
+		\item Weighted QMIX introduces additional complexity 
 			\begin{itemize}
-				\item Additional model we must now think about
-				\item Weighting function into our loss
+				\item Additional model 
+				\item Weighting function in loss
 			\end{itemize}
-		\item This extra complexity can lead to \textit{regressions} in performance compared to QMIX.
+		\item Can cause \textit{regressions} compared to QMIX
 	\end{itemize} 
 	\begin{center}
 		\includegraphics[width=0.8\textwidth]{wqmix_corridor_limitations.png}
@@ -939,8 +950,10 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 \frame{
 	\frametitle{Future Directions/Questions}
 	\begin{itemize}
-		\item Our choice of weightings for Deep RL is relatively arbitrary.
-		\item Architecture/training of the centralised $\hat{Q}^*$ is lacking.
+		\item Our choice of weightings for Deep RL is relatively arbitrary
+		\vspace{3mm}
+		\item Architecture/training of the centralised $\hat{Q}^*$ is lacking
+		\vspace{3mm}
 		\item Why doesn't something like QPLEX work in our Predator Prey?
 	\end{itemize} 
 
