@@ -672,7 +672,7 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 \frame{
 	\frametitle{Limitations of QMIX}
 	\begin{itemize}
-		\item QMIX cannot represent \textbf{all} possible joint-action $Q$-values\\
+		\item QMIX cannot represent \textbf{all} possible joint action $Q$-values\\
 		\item Can have catastrophic consequences:
 	\end{itemize}
 	\begin{center}
@@ -782,6 +782,7 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 \frame{
 	\frametitle{Hypothetical}
 	\begin{itemize}
+		\item \textit{Hypothetically}, what if we knew what the optimal joint action was?
 		\item What if we \textbf{only} consider error on the optimal joint action?
 	\end{itemize}
 	\begin{center}
@@ -807,7 +808,9 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 	\end{center}
 	\begin{itemize}
 		\item For a single joint action, QMIX's limitations have no effect
-		\item Ideally, we also want to learn $Q$-values for the other joint-actions that are below the optimal action's $Q$ \sw{This doesn't seem right: we *need* to estimate those other joint values in oder to know which joint action is optimal in the first place.}
+		\item In general though, we also need to estimate $Q$-values for the other joint actions
+		\item Ideally, we want to learn $Q$-values for them that do not impact our optimal joint action's $Q$-values
+		% \item Ideally, we also want to learn $Q$-values for the other joint-actions that are below the optimal action's $Q$ \sw{This doesn't seem right: we *need* to estimate those other joint values in oder to know which joint action is optimal in the first place.}
 	\end{itemize}
 
 }
@@ -828,9 +831,9 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 
 \frame{
 	\frametitle{Candidates for the Weighting Functions}
-\sw{Can you improve the alignment on this slide?}
+% \sw{Can you improve the alignment on this slide?}
 	\begin{itemize}
-		\item Idealised Central Weighting: 
+		\item \textbf{Idealised Central Weighting:} 
 	\end{itemize}
 	\begin{multicols}{2}
 		\begin{equation*}
@@ -842,14 +845,17 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 		    \end{cases}
 		\end{equation*}
 	\columnbreak
+	\vspace*{-2mm}
+	\vspace*{\fill}
 	\begin{itemize}
 		\item Not practical 
 		\item Requires approximation
 	\end{itemize}
+	\vspace*{\fill}
 	\end{multicols}
 
 	\begin{itemize}
-		\item Optimistic Weighting:
+		\item \textbf{Optimistic Weighting:}
 	\end{itemize}
 	\begin{multicols}{2}
 		\begin{equation*}
@@ -860,10 +866,13 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 		    \end{cases}
 		\end{equation*}
 	\columnbreak
+	\vspace*{-2mm}
+	\vspace*{\fill}
 	\begin{itemize}
 		\item Easy to use
 		\item Less obvious it works
 	\end{itemize}
+	\vspace*{\fill}
 	\end{multicols}
 \begin{itemize}
 	\item Theoretical results apply to both
@@ -913,7 +922,8 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 \frame{
 	\frametitle{Predator Prey}
 	\begin{itemize}
-		\item \bld{TODO: Add description of reward structure}
+		\item 2 agents need to try and capture the prey at the \textbf{same} timestep
+		\item Punished if only 1 agent attempts capture
 	\end{itemize}
 	\begin{center}
 		\includegraphics[width=0.8\textwidth]{wqmix_predprey_test_return.png}
@@ -972,7 +982,11 @@ Tabish Rashid, Mikayel Samvelyan, Christian Schroeder de Witt,\\ Gregory Farquha
 \vspace{1mm}
 Tabish Rashid, Mikayel Samvelyan, Christian Schroeder de Witt,\\ Gregory Farquhar, Jakob Foerster, \& Shimon Whiteson \\ \ \\
 
-\bld{TODO: update with WQMIX}
+\emph{Weighted QMIX: Expanding Monotonic Value Function Factorisation\\for Deep Multi-Agent Reinforcement Learning}, {\bf NeurIPS-20}\\
+\vspace{1mm}
+Tabish Rashid, Gregory Farquhar, Bei Peng \& Shimon Whiteson \\ 
+
+% \bld{TODO: update with WQMIX}
 }
 
 \frame{
@@ -984,7 +998,9 @@ Tabish Rashid, Mikayel Samvelyan, Christian Schroeder de Witt,\\ Gregory Farquha
 	\vspace{4mm}
 	\item Extensive results suggest factorisation is crucial
 	\vspace{4mm}
-	\item \bld{TODO: update with WQMIX}
+	\item QMIX's learnt $Q$-values can be inaccurate/unhelpful 
+	\vspace{4mm}
+	\item Adding a weighting to the loss function can rectify this
 \end{itemize}
 }
 
