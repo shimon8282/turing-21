@@ -710,11 +710,13 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 \frame{
 	\frametitle{Fundamental Limitations of QMIX}
 	\begin{itemize}
-		\item These limitations are \textbf{fundamental} to QMIX\\
+		\item This limitation is \textbf{fundamental} to QMIX\\
 		\vspace{3mm}
 		\item Consequence of deliberate factorisation of the joint $Q$-function\\
 		\vspace{3mm}
 		\item Not resolved with bigger networks, more training, more compute, etc.\\
+		\vspace{3mm}
+		\item QMIX \textbf{cannot} represent all joint-action $Q$\\
 		\vspace{3mm}
 	\end{itemize}
 	\begin{center}
@@ -906,6 +908,7 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 }
 
 
+
 \frame{
 	\frametitle{Deep RL Weighted QMIX}
 %SW: mention the points below when you speak but you don't need them on the slide
@@ -917,6 +920,74 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 	\begin{center}
 		\includegraphics[width=1\textwidth]{wqmix_targets.png}
 	\end{center}
+	\begin{multicols}{2}
+		Central Weighting (\textbf{CW-QMIX})
+			\begin{equation*}
+			    w(s,\mathbf{u}) = 
+			    \begin{cases}
+			    % 1 & Q_{critic}(s,\mathbf{u}) > Q_{critic}(s,\mathbf{u}^*) ~~\text{or}~~ \mathbf{u} = \mathbf{u}^* \\
+			    1 & \mathbf{u} = \hat{\mathbf{u}} ~\text{or}~ y_i > \hat{Q}^*(s, \hat{\mathbf{u}}) \\
+			    \alpha & \text{otherwise}.
+			    \end{cases}
+			\end{equation*}
+			% \vspace*{\fill}
+			% \vfill\null
+		\\
+		\columnbreak
+		Optimistic Weighting (\textbf{OW-QMIX})
+			\begin{equation*}
+			w(s,\mathbf{u}) = 
+		    \begin{cases}
+			    1 & Q_{tot}(s,\mathbf{u}) < y_i \\
+			    \alpha & \text{otherwise}.
+		    \end{cases}
+		\end{equation*}
+	\end{multicols}
+}
+
+\frame{
+	\frametitle{Similarities to Actor-Critic}
+	\begin{itemize}
+		\item Define deterministic QMIX policy as:
+		\vspace{5mm}
+	\end{itemize}
+		\begin{equation*}
+		\pi(s) = \begin{pmatrix}
+		\argmax_{u_1}Q_1(s, u_1)\\
+		\hdots \\
+		\argmax_{u_n}Q_n(s, u_n) 
+		\end{pmatrix}
+		\end{equation*}
+	\begin{itemize}
+		\item Think of $\hat{Q}^*$ as a critic
+		\item Weighted QMIX then looks like an off-policy actor-critic algorithm
+		\item Difference is in how the actors are trained
+	\end{itemize}
+}
+
+\frame{
+	\frametitle{Relevant Baselines}
+	\begin{itemize}
+		\item MADDPG and MASAC
+		\begin{itemize}
+			\item Implementations as close to Weighted QMIX as possible
+			\item Only difference is the optimisation of agents
+		\end{itemize}
+	\end{itemize}
+	\begin{itemize}
+		\item QTRAN
+		\begin{itemize}
+			\item Can be viewed as specific choices of the 3 components in Weighted QMIX
+		\end{itemize}
+	\end{itemize}
+	\begin{itemize}
+		\item QPLEX
+		\begin{itemize}
+			\item Can theoretically represent \textbf{all} joint-action $Q$-functions
+			\item Maintains consistency as well!
+		\end{itemize}
+	\end{itemize}
+
 }
 
 \frame{
@@ -931,6 +1002,22 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 }
 
 \frame{
+	\frametitle{Implicit Weighting in Deep RL Setting}
+	\begin{itemize}
+		\item Deep RL QMIX has an \textbf{implicit} weighting function
+	\end{itemize}
+	\begin{center}
+		Loss $\approx \sum_{i} \underbrace{\textcolor{red}{b(s_i,\mathbf{u}_i)}}_{\mathclap{\text{\bld{Implicit Weighting}}}}(y_i - Q_{tot}(s_i,\mathbf{u}_i))^2$
+	\end{center}
+	\begin{itemize}
+		\item $b$ is hard to control
+	\end{itemize}
+	\begin{center}
+		Weighted Loss $\approx \sum_{i} \underbrace{\textcolor{blue}{w(s_i,\mathbf{u}_i)}}_{\mathclap{\text{\textcolor{blue}{User-defined Weighting}}}}b(s_i,u_i)(y_i - Q_{tot}(s_i,\mathbf{u}_i))^2$
+	\end{center}
+}
+
+\frame{
 	\frametitle{Robustness to Exploration Results}
 	%\begin{itemize}
 		%\item 
@@ -938,6 +1025,17 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 %	\end{itemize} 
 	\begin{center}
 		\includegraphics[width=0.8\textwidth]{wqmix_3s5z_robustness_epsilon.png}
+	\end{center}
+}
+
+\frame{
+	\frametitle{SMAC Exploration Results}
+	%\begin{itemize}
+		%\item 
+		Additional exploration can be beneficial in some SMAC scenarios.
+%	\end{itemize} 
+	\begin{center}
+		\includegraphics[width=0.8\textwidth]{wqmix_6h_vs_8z.png}
 	\end{center}
 }
 

@@ -1,0 +1,207 @@
+31
+
+Revisiting a point Shimon made earlier in the talk:
+That the monotonic mixing of QMIX cannot capture, or represent, coordination.
+
+How important is this in general? We've seen that in SMAC QMIX performs really well, despite this.
+However, what are the consequences of not being able to represent coordination in our Q-values?
+What I mean by representing coordination, is the ability to learn joint-action Q-values in which an agents best-action can depend on the actions of the other agents.
+
+32
+
+We know QMIX cannot represent all possible joint-action Q-values. 
+
+This limitation can have catastrophic consequences in the following example from the QTRAN paper.
+On the left is a simple matrix game with 2 agents and 3 actions.
+
+We can see that what QMIX learns, on the right, fails to recover the correct argmax and severely underestimates the maximum Q-value in the top-left. 
+Considering that the ability to recover the argmax, and accurately estimate the maximum Q-value are crucial for Q-Learning, this suggests that maybe we should be at least a little worried about this.
+
+33
+
+But how worried should we be? Can we simply rectify all of this by using a bigger network, a fancier optimiser or smarter learning rates for instance?
+
+The answer is, No. 
+This limitation is a cause for concern because is really is a fundamental part of QMIX.  
+
+It arises as a consequence of the factorisation that we deliberately chose. 
+
+The fundamental part is important, because this limitation is really baked deep into the algorithm. 
+We cannot get around it by using bigger networks, more training, more compute, etc
+QMIX simply cannot represent all joint-action Q.
+
+So let's try and understand what is going wrong in some more detail. 
+We want to try and pinpoint exactly where QMIX fails, so that we can think about how to improve it
+
+34
+
+To do so let’s consider an idealised version of QMIX, in the form of an operator. 
+We’re interested in this idealised version specifically because we want to isolate these fundamental parts of QMIX. 
+
+By taking an operator outlook, we can sidestep all issues of exploration, compute, architectures and general deep learning function approximation hardness.
+
+Our operator, T Qmix here, we define as the composition of the standard Bellman optimality operator and our QMIX specific projection operator. Essentially, we first compute the targets and then project them into the space of joint-action Q-values that QMIX can represent.
+
+Our important projection operator is shown at the bottom.
+We define it as the q in the space of things that QMIX can represent, that minimises the squared loss with our target Q-values that we are trying to represent.
+
+35
+
+So in this setup, the projection operator is the important thing that is actually specific to QMIX.
+
+And if we try and think about what this projection is doing, we can see that it is weighting the errors for all joint-actions equally. 
+Hence for this matrix game we end up misrepresenting the Q-value for the optimal action in the top-left in red.
+
+What this tells us, at least for this specific helpful example, is that under this setup it is more important to get the Q-values for the bad -12 entries correct as opposed to being correct about the optimal actions Q-value. This is all because there are more of these -12s, and ultimately this projection is only interested in the total squared error. 
+
+36
+
+So hypothetically, what would happen if we knew the optimal joint-action and only considered it's error in our projection?
+
+For a single joint-action the representational limitations of QMIX have no affect, and so we are able to correctly estimate the Q-value with no problems.
+
+In general though, we won't know the optimal joint-action and we are going to need to be estimating the Q-values for all of these joint-action in some manner.
+
+Now ideally, we want to learn Q-values for the other joint-actions that aren't going to impact our optimal joint-actions Q-value.
+
+37
+
+Based on that intuition, let’s introduce a weighting function into our objective so that we adjust how important the error is for specific joint-actions.
+
+In our projection this means we introduce a function w like this. 
+
+Importantly, this weighting only changes the Q-values that are returned from our projection operator. 
+We are still operating within the same class of joint-action Q, we are still restricted by what QMIX can represent.
+However, we can change the q that we do learn, so that they have better properties. 
+Two important ones being that the correct argmax is returned, and the correct maximum Q-value is learnt. 
+
+38
+
+We considered 2 different weighting functions which aim to try and place a larger weighting on the better joint-actions.
+
+The first is the idealised central weighting, which is not a practical weighting since it requires access to the true argmax.
+We put a weight of 1 on the true optimal joint-action, and a smaller weight alpha on everything else.
+If we already knew the argmax we wouldn’t need to bother with all this. But it’s really just meant as a tool for theoretical analysis, and in experiments is approximated. 
+
+The second is the optimistic weighting which is nice and easy to use experiments, but perhaps isn’t as obviously correct as the previous weighting. 
+If QMIX's Q-value, Q tot is lower than the target the we use a high weighting of 1.
+If our estimate if overestimating the target, then we use a smaller weight of alpha.
+
+We prove that both of these recover the correct argmax and thus the correct maximum Q-value for sufficiently small alpha.
+
+39
+
+Now that we’ve covered the weighting, we can describe Weighted QMIX as a whole.
+
+There are 3 main components to it:
+
+1 are Qmix’s Q-values, Q tot. This ultimately produces our decentralised agents and allows us to efficiently maximise by proposing the argmax action.
+
+Second is the weighted loss, which we’ve argued is important for changing the Q-values that QMIX learns in order to ensure we can recover the correct argmax and the correct maximum Q-value.
+
+Finally the last component which we haven't mentioned yet is the centralised, unrestricted Q-value estimates we also learn. The idea behind this is that we want to learn accurate Q-values without worrying about how the weighting is affecting the quality of our estimates as training progresses.
+And perhaps we can learn more accurate Q-values if we are not restricted in the structure of our Q.
+These are just used to estimate the Q-values for the joint-actions proposed by QMIX.
+
+40
+
+All of the theoretical work, whilst nice in providing a firm theoretical foundation to build on, is ultimately just meant to serve as inspiration, or a guide, towards building our Deep RL algorithm. 
+Ultimately, we are interested in the Deep MARL setting, on improving performance there.
+
+So how can we realise Weighted QMIX in practise? The diagram at the top is the way we implemented and tested in the paper. 
+It shows how we compute our targets, the y_i, and the 2 loss functions used to train QMIX's Q-values and our centralised Q-values.
+In particular our centralised Q has the same structure as QMIX, but features a simple feedforward network instead of any hypernetworks or anything more complex.
+It is trained through L2 regression as is normal, on the exact same targets as QMIX.  
+Importantly, only QMIX has the weighting applied to its loss function.
+
+I mentioned earlier that Idealised central weighting needs to be approximated, at the bottom on the left is how we do so.
+We give a high weighting if the action is the current argmax that QMIX suggests, or if its target is greater than our centralised Q's estimate.
+For the optimistic weighting on the right, we can use it pretty much as is. If QMIX' Q-value Q_tot is less than its target, then we give a high weighting. 
+
+41
+
+An interesting thing to touch upon, is the similarities that weighted qmix bears to an off-policy actor-critic setup.
+The actor is QMIX's greedy deterministic policy, shown here.
+The critic is the centralised Q-values that we learn.
+Weighted QMIX then trains our centralised critic to estimate the Q-values of this deterministic policy.
+This can also be thought of as an approximation to Q-learning since our policy is approximately argmaxing the centralised Q-values.
+The big difference between weighted qmix and other similar actor-critic algorithms like MADDPG or a multi-agent version of SAC, is in how the actors are trained.
+Weighted QMIX trains them indirectly through our weighted q-learning loss, whereas MADDPG uses a deterministic policy gradient theorem.
+
+42
+
+And so, before we come to some results I'll just briefly outline some of the baselines that we consider.
+
+Due to the connections we just talked about, we compare to MADDPG and a multi-agent SAC. Importantly, these implementations that we used are designed to be as close to weighted qmix as possible with the only real difference being how the actors are trained.
+
+QTRan is another very relevant baseline, which also has some interesting links to weighted qmix. Specifically, you can view QTRAn as specific choices of the 3 components of weighted qmix. Qtot is learnt through VDN instead of QMIX, and the weighting function is very different.
+
+Finally, another very important baseline is QPLEX which I will very briefly outline.
+The important thing about QPLEX is that it can theoretically represent all joint-action Q-values, so it doesn't have any representational constrains like QMIX does.
+Crucially, it does this whilst maintaining the same consistency that VDN and QMIX do.
+
+43
+
+So after all that, was any of this useful to our final performance? 
+
+I think it was, especially in the sorts of scenarios in which QMIX and related methods fail because of these representational constraints.
+
+This is one such task, a predator prey task in which the agents are punished for not coordinating when trying to capture a prey. 
+2 agents need to attempt capture at exactly the same timestep, otherwise there is a punishment.
+
+Weighted QMIX, CW-QMIX representing the central weighting and OW-QMIX representing the optimistic weighting do very well here.
+
+We can see that QMIX (and VDN as well not shown here) completely fail because they just cannot represent that kind of Q-value in which there is a significant punishment for miscoordination. 
+Interestingly, QPLEX also fails on this task indicating that whilst it can theoretically represent all joint-action Q it might struggle to learn some of them.
+
+The other important class of baselines are the actor-critic approaches MADDPG and a multi-agent version of SAC which also fail. We included these because weighted qmix can be thought of as being very similar to an actor-critic setup, except the actors, the agents are trained indirectly through a Q-learning loss as opposed to a policy-gradient.
+
+The last baseline, QTRAN performs quite well here, and again there are some nice strong links between Weighted QMIX and QTRAN. Specifically we can view QTRAN as specific choices of the 3 different parts of Weighted QMIX. 
+
+42
+
+One important aspect of weighted qmix which we haven’t really focussed on, is the way it separates the Q-values that QMIX learns from the data that is being trained on.
+In the Deep RL setting, QMIX has an implicit weighting function, based on the data gathered by the behavioural policy. And so what QMIX learns can be quite sensitive to the type and extent of exploration that is performed. The more you take random actions, the closer you might be to a uniform weighting for instance which can lead to bad results as we’ve seen.
+However, Weighted QMIX, through the weighting, aims to separate what is learnt from the specific data we are training on. Ideally, our weighting should enable us to learn in perhaps unfavourable situations where plain QMIX would fail.
+
+We test this by increasing the amount of exploration we performed.
+Shown here are the results for a SMAC map 3s5z, in which the extra exploration is unnecessary to all of the methods. What we're looking to see is how well each method is able to utilise the data, how robust they are to an increase level of exploration that isn't necessary.
+We can see that weighted qmix does much better than QMIX in dealing with more exploration in this setup.
+
+
+43
+
+Now of course, its not all sunshine and rainbows. Weighted QMIX introduces additional complexity over QMIX which can be detrimental. 
+We have this entire other model to now worry about, the centralised Q. 
+We also have this weighting function which we must choose and potentially tune sensibly as well.
+
+We can see that in some harder scenarios, corridor from SMAC shown here, we can have regression in performance compared to the simpler QMIX.
+
+44
+
+Thinking about future directions for research.
+
+One big area for potential improvement is the weighting function that we use. There is no reason we need to limit ourselves to this binary weighting, I'm sure there are better weighting functions out there that perhaps are designed more specifically with our deep learning setup in mind.
+
+Another big area that we know is a bottleneck, is the architecture for the centralised Q. On the harder maps and scenarios, its extra flexibility seems to be holding performance back. Instead, we should try and leverage its extra flexibility, and turn it into a big benefit, a strength, of the method.
+
+Finally, an interesting question I've been thinking a little bit about is why something like QPLEX fails in our particular predator prey task. Theoretically, QPLEX can represent all joint-action Q, so it shouldn't have any issues stemming from representational constraints. But empirically, at least in this task it really struggles to take advantage of that.
+
+45
+
+Here is a list of the papers that we have focussed on during this talk.
+The original QMIX paper, which was published at ICML in 2018. This was my first proper paper and I learnt a huge amount from everyone as part of going through the experience, which was invaluable.
+We later expanded on the results with a much more detailed analysis and the results from the SMAC benchmark.
+Finally, I've been presenting results from the Weighted QMIX paper which was at NeurIPS last year in 2020.
+
+All of the code for these papers is available if you are interested in this setting. In particular I think its relatively quick to get up and running and doing research, many other papers and relevant methods also utilise PyMARL, our framework for this, so its very easy to run the official implementations for them as well.
+
+46
+
+To conclude, we presented QMIX a simple, effective value function factorisation method for deep MARL.
+Our experimental results strongly suggest that factorisation is crucial to good performance.
+However, the Q-values that QMIX learns can sometimes be inaccurate or unhelpful.
+But we can remedy this by introducing a weighting function into our loss, in order to change the approximation that QMIX makes.
+
+Thank you.
+
