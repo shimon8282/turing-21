@@ -1004,13 +1004,14 @@ Cyan = sight range \ \ \ \ \ Red = shooting range
 \frame{
 	\frametitle{Implicit Weighting in Deep RL Setting}
 	\begin{itemize}
-		\item Deep RL QMIX has an \textbf{implicit} weighting function
+		\item Deep RL QMIX has an \textbf{implicit} weighting function:
 	\end{itemize}
 	\begin{center}
 		Loss $\approx \sum_{i} \underbrace{\textcolor{red}{b(s_i,\mathbf{u}_i)}}_{\mathclap{\text{\bld{Implicit Weighting}}}}(y_i - Q_{tot}(s_i,\mathbf{u}_i))^2$
 	\end{center}
 	\begin{itemize}
 		\item $b$ is hard to control
+		\item Deep RL Weighted QMIX also has an \textbf{explicit} weighting:
 	\end{itemize}
 	\begin{center}
 		Weighted Loss $\approx \sum_{i} \underbrace{\textcolor{blue}{w(s_i,\mathbf{u}_i)}}_{\mathclap{\text{\textcolor{blue}{User-defined Weighting}}}}b(s_i,u_i)(y_i - Q_{tot}(s_i,\mathbf{u}_i))^2$

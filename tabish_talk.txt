@@ -142,7 +142,7 @@ Crucially, it does this whilst maintaining the same consistency that VDN and QMI
 
 43
 
-So after all that, was any of this useful to our final performance? 
+So after all that, was any of the weighted qmix stuff useful or helpful to our final performance? 
 
 I think it was, especially in the sorts of scenarios in which QMIX and related methods fail because of these representational constraints.
 
@@ -154,30 +154,40 @@ Weighted QMIX, CW-QMIX representing the central weighting and OW-QMIX representi
 We can see that QMIX (and VDN as well not shown here) completely fail because they just cannot represent that kind of Q-value in which there is a significant punishment for miscoordination. 
 Interestingly, QPLEX also fails on this task indicating that whilst it can theoretically represent all joint-action Q it might struggle to learn some of them.
 
-The other important class of baselines are the actor-critic approaches MADDPG and a multi-agent version of SAC which also fail. We included these because weighted qmix can be thought of as being very similar to an actor-critic setup, except the actors, the agents are trained indirectly through a Q-learning loss as opposed to a policy-gradient.
+The other important class of baselines are the actor-critic approaches MADDPG multi-agent SAC which also fail here. Suggesting that there is certainly room for improvement in those policy-gradient methods. If you're interested we had some recent work on this, a factorised variant of Maddpg which we call FACMAC.
 
-The last baseline, QTRAN performs quite well here, and again there are some nice strong links between Weighted QMIX and QTRAN. Specifically we can view QTRAN as specific choices of the 3 different parts of Weighted QMIX. 
+Finally, QTRAN performs quite well here suggesting that a weighting of some sort can be very helpful.
 
-42
+44
 
 One important aspect of weighted qmix which we haven’t really focussed on, is the way it separates the Q-values that QMIX learns from the data that is being trained on.
 In the Deep RL setting, QMIX has an implicit weighting function, based on the data gathered by the behavioural policy. And so what QMIX learns can be quite sensitive to the type and extent of exploration that is performed. The more you take random actions, the closer you might be to a uniform weighting for instance which can lead to bad results as we’ve seen.
 However, Weighted QMIX, through the weighting, aims to separate what is learnt from the specific data we are training on. Ideally, our weighting should enable us to learn in perhaps unfavourable situations where plain QMIX would fail.
 
+45
+
 We test this by increasing the amount of exploration we performed.
-Shown here are the results for a SMAC map 3s5z, in which the extra exploration is unnecessary to all of the methods. What we're looking to see is how well each method is able to utilise the data, how robust they are to an increase level of exploration that isn't necessary.
-We can see that weighted qmix does much better than QMIX in dealing with more exploration in this setup.
+Shown here are the results for a SMAC map 3s5z, in which the extra exploration is unnecessary to all of the methods. What we're looking to see is how well each method is able to utilise the data gathered by their very exploratory behavioural policies, how robust they are to an increased level of exploration that isn't necessary.
+We can see that weighted qmix does much better in this scenario than QMIX in dealing with more exploration in this setup.
 
+46
 
-43
+In some other scenarios, such as the SMAC map 6h_vs_8z, the additional exploration can be extremely helpful.
+Importantly though, you need to be able to take advantage of it. 
+Here we test weighted qmix and qmix with 2 different epsilon schedules, with the more exploratory one ultimately leading to much better performance.
+In this scenario the more exploratory qmix is unable to take advantage of the data is training on, whereas weighted qmix is.
+
+47
 
 Now of course, its not all sunshine and rainbows. Weighted QMIX introduces additional complexity over QMIX which can be detrimental. 
 We have this entire other model to now worry about, the centralised Q. 
 We also have this weighting function which we must choose and potentially tune sensibly as well.
 
-We can see that in some harder scenarios, corridor from SMAC shown here, we can have regression in performance compared to the simpler QMIX.
+We can see that in some harder scenarios, corridor from SMAC shown here, we can have regression in performance compared to the simpler QMIX. This map is often used to test the exploratory capability of the agents, since otherwise its very difficult to learn a good strategy. 
 
-44
+In the last couple of slides, we looked at some of the results we had in the paper, but there are more if you're interested.
+
+48
 
 Thinking about future directions for research.
 
@@ -187,7 +197,7 @@ Another big area that we know is a bottleneck, is the architecture for the centr
 
 Finally, an interesting question I've been thinking a little bit about is why something like QPLEX fails in our particular predator prey task. Theoretically, QPLEX can represent all joint-action Q, so it shouldn't have any issues stemming from representational constraints. But empirically, at least in this task it really struggles to take advantage of that.
 
-45
+49
 
 Here is a list of the papers that we have focussed on during this talk.
 The original QMIX paper, which was published at ICML in 2018. This was my first proper paper and I learnt a huge amount from everyone as part of going through the experience, which was invaluable.
@@ -196,7 +206,7 @@ Finally, I've been presenting results from the Weighted QMIX paper which was at 
 
 All of the code for these papers is available if you are interested in this setting. In particular I think its relatively quick to get up and running and doing research, many other papers and relevant methods also utilise PyMARL, our framework for this, so its very easy to run the official implementations for them as well.
 
-46
+50
 
 To conclude, we presented QMIX a simple, effective value function factorisation method for deep MARL.
 Our experimental results strongly suggest that factorisation is crucial to good performance.
