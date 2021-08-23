@@ -1,8 +1,8 @@
-{\rtf1\ansi\ansicpg1252\cocoartf2513
+{\rtf1\ansi\ansicpg1252\cocoartf2580
 \cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
 {\colortbl;\red255\green255\blue255;}
 {\*\expandedcolortbl;;}
-\vieww25400\viewh27380\viewkind0
+\vieww14200\viewh16380\viewkind0
 \deftab720
 \pard\pardeftab720\ri-3833\sl276\slmult1\partightenfactor0
 
@@ -37,55 +37,19 @@
 \
 \
 \
-UT Talk\
+Turing Talk\
 \
 1:\
 \
-Thank you for that introduction and thanks for the invitation to speak today.  It\'92s really a pleasure to have the chance to tell you a bit about multi-agent reinforcement learning, which is one of my favourite research topics.\
-\
-The work I\'92m going to present is joint work with the many collaborators listed here.  Most of these collaborators are current or former students or postdocs in my lab, but some are also from other Oxford departments, including statistics and information engineering, with whom we collaborate closely.\
+Thank you for that introduction and thanks for the invitation to speak today.  It\'92s really a pleasure to have the chance to tell you a bit about our work on multi-agent reinforcement learning.\
 \
 2:\
 \
-As you no doubt know, the standard paradigm in reinforcement learning involves a single agent interacting with a stationary environment, processing sensory input and selecting actions in order to maximise a reward signal.  \
+Presumably I don\'92t need to explain the importance of multi-agent systems for this audience.  This talk focuses entirely on cooperative multi-agent systems, and in particular how to do cooperative multi-agent reinforcement learning.  The cooperative setting is all about solving coordination problems: how to get a team of agents to work together to achieve a common goal.  This setting is important because a large number of these real-world multi-agent systems are cooperative, like a team of robots in a warehouse, or contain subgroups that can be usefully modelled as such, like a fleet of self-driving cars sharing public roads with human drivers.\
 \
-While this is a powerful and broadly applicable paradigm, one key limitation of it is that it assumes the learning agent is the only agent in the world.\
+Before we can get into some of the methods we\'92ve developed, we have to get clear on the exact problem setting.  This is a common source of confusion because, once you depart from the simplicity of the single agent setting, there\'92s an explosion of possible settings, each with different assumptions about the agents, what they can observe, what actions they can take, and how they are rewarded.  At one point, I got so frustrated with people misunderstanding our setting that I asked Jakob Foerster, who at the time was a PhD student in my lab: can you just make a single slide that clearly encapsulates the problem setting we\'92re working on.\
 \
 3:\
-\
-A natural extension is thus to a multi-agent paradigm, in which each agent acknowledges and reasons about the fact that the environment with which it interacts consists of other agents who are also perceiving input and selecting actions in order to accrue reward.\
-\
-4:\
-\
-This extension is natural because multi-agent systems are everywhere.  The real world is full of scenarios that are naturally modelled with multiple agents.  So if we want to build intelligent agents that can act in the real world and solve real-world problems, we need to tackle this multi-agent paradigm.\
-\
-5:\
-\
-At a high-level, we can group multi-agent systems into three categories.\
-\
-We have fully cooperative settings, in which all agents are on the same team. In other words, their interests are perfectly aligned because they are maximising the same shared, team reward function.  The key question is then how they can efficiently coordinate their behaviour to achieve this shared objective.  The cooperative setting is the simplest conceptually because our definitions, objectives, and solution concepts all carry over nicely from the single-agent setting.\
-\
-Then we have fully competitive settings, in which the agent\'92s interests are diametrically opposed.  This requires us to really start reasoning in a new game-theoretic way and use new solution concepts like the minimax equilibrium.  However, such concepts still offer a sensible way forward with reinforcement learning, as long as we are happy to take a risk-adverse approach of planning for the worst-case scenario in which the other agent behaves optimally.\
-\
-Finally we have mixed settings, the so-called general sum games, which can contain both cooperative and competitive aspects.  For example, in a negotiation, both parties stand to benefit from striking a deal but the seller would like a high price and the buyer a low one.  While mixed settings are obviously the most realistic, they are also the most problematic.  We can extend minimax equilibria to Nash equilibria but learning such equilibria often requires unrealistic assumptions about the other agents and how they learn, and may mot predict the behaviour of rational agents anyway.  A famous paper once asked \'93If multi-agent learning is the answer, what is the question?\'94, which nicely encapsulates the conceptual challenges in mixed settings.\
-\
-This talk focuses entirely on cooperative multi-agent reinforcement learning, not because the other settings aren\'92t important or interesting, but because even in the cooperative case we already have plenty of challenges to keep us busy and, thanks to its similarity to the single-agent setting, we can say with confidence what question it is answering.\
-\
-6:\
-\
-In addition, the cooperative setting is important because a large number of these real-world multi-agent systems are cooperative, like a team of robots in a warehouse, or contain subgroups that can be usefully modelled as such, like a fleet of self-driving cars sharing public roads with human drivers.\
-\
-7:\
-\
-Multi-agent RL has been a key focus on my research group since I joined Oxford in 2015, and almost all of that work has been on cooperative settings.  As you can see from this list, we love a good acronym.  But today, rather than try to give you a survey of all this work, I\'92m going to do something different, which is to give a deep dive into a single method, namely the QMIX method we published in 2018.  It\'92s not an obvious choice to be honest.  It\'92s not our newest work, it\'92s not our most cited paper, and it didn\'92t win a best paper award.  It\'92s also not the most sophisticated algorithmically; on the contrary it\'92s really quite a simple idea.  \
-\
-But I\'92ve chosen it because, of all the methods we\'92ve developed, it\'92s the one that has really proved reliable and effective across repeated empirical evaluations and still proves challenging to outperform, despite quite a lot of algorithmic innovation occurring in this area.  Perhaps for this reason, it\'92s the method from my group that has most influenced the community and that others have built upon the most.  \
-\
-There\'92s another reason too.  As a supervisor, I sometimes struggle to get students to look beyond publication as the end goal of research.  I\'92m always pushing them to look deeper and analyse further, even after the work is published.  But being PhD students, they usually just ignore me and do whatever they want.  But in this case, they actually did what I asked, performing extra benchmarking, ablations, and analysis that not only confirm the utility of QMIX as a method, but shed some light on the sometimes unexpected reasons why it works.  \
-\
-But before we can get into the method, we have to get clear on the problem setting.  This is a common source of confusion because, once you depart from the simplicity of the single agent setting, there\'92s an explosion of possible settings, each with different assumptions about the agents, what they can observe, what actions they can take, and how they are rewarded.  At one point, I got so frustrated with people misunderstanding our setting that I asked Jakob Foerster, who at the time was a PhD student in my lab: can you just make a single slide that clearly encapsulates the problem setting we\'92re working on.\
-\
-8:\
 \
 Well, this is what he came up with.  You can judge for yourself whether he succeeded.  The setting is of course multi-agent and cooperative, as I\'92ve discussed.  \
 \
@@ -95,13 +59,13 @@ In addition, we require that the policies learned by the agents can be executed 
 \
 However, we assume that learning takes place in a simulator or other safe setting like a laboratory, such that the learning process can be centralised.  The agents can share parameters, observations, gradients, whatever they want.  There are no rules, as long as the resulting policies are amenable to decentralised execution.\
 \
-9:\
+4:\
 \
 To formalise this setting, let\'92s start with the basics, the single-agent MDP.  I\'92ll assume you\'92re familiar with it but just note that in our notation the action is denoted with u, as a will later be used to refer to the agent.  \
 \
 We have transition and reward functions, the return is a discounted sum of rewards, and value functions represent conditional expected returns.\
 \
-10: \
+5: \
 \
 Now, the simplest way to make this setting multi-agent is to just add a separate action space for each agent. So every agent sees the global state, but can select its own action.  So a in the superscript here indicates which agent is taking the action.  \
 \
@@ -109,7 +73,7 @@ The transition and reward functions are the same as before but now condition on 
 \
 As you may have already noticed, there\'92s nothing fundamentally multi-agent about the multi-agent MDP.  In fact we can think of it as just a single-agent MDP with a factored action space.  In other words taking an action means specifying a whole vector, as if a single puppeteer agent was controlling all the robots or whatever from above.\
 \
-11:\
+6:\
 \
 That\'92s why partial observability is crucial to making the setting truly multi-agent, and this can be modelled with the decentralised partially observable Markov decision process or Dec-POMDP\
 \
@@ -123,23 +87,7 @@ And of course, as I mentioned we\'92re performing centralised learning of decent
 \
 I\'92ve become a bit of an evangelist for this setting because a core belief of mine is that making progress on hard problems is often about making the right assumptions.  We\'92re looking for assumptions that give us a lot of leverage on the problem but which still mostly or approximately hold in the real world.  And this assumption meets those criteria.  We don\'92t deploy robots tabula rasa: we train them in a simulator or laboratory first, and centralising that process is a powerful tool in learning coordinated behaviour among cooperative agents.  \
 \
-In fact, this is such a crucial part of the problem setting that at a certain point I decided to make my own slide to complement Jakob\'92s.\
-\
-12: \
-\
-And here it is, in honour of my teenage musical tastes.  Of course the community completely ignored me and adopted a different acronym instead, CTDE: centralised training with decentralised execution, which is a perfectly accurate description but unfortunately doesn\'92t sound like the name of a rock band.\
-\
-13:\
-\
-One way to get some intuition about the Dec-POMDP is to reason about the predictability / exploitation dilemma.  I\'92m sure you\'92re all familiar with the exploration / exploitation dilemma from single-agent reinforcement learning, well this is a different but related dilemma.  \
-\
-On the one hand the agents need to exploit because obviously maximising performance means collecting reward.  In a single-agent setting this requires exploiting what you observe.  If you see a coin to your left, then you know which way you need to go to collect a coin.\
-\
-But in the Dec-POMDP, the agents cannot explicitly communicate, so coordinating with each other requires maintaining predictability.  They need to stick to the plan agreed on during centralised training or risk miscoordinating with their teammates.  Sometimes, being predictable requires ignoring even highly relevant private information, if it\'92s unlikely that your teammates have received similar information.  In the extreme case, the optimal policy can even be completely open loop, ignoring all private observations because conditioning on them is just too risky.\
-\
-When does the benefit of exploiting private observations outweigh the cost in predictability?  That is a central dilemma faced by a Dec-POMDP agent.\
-\
-14:\
+7:\
 \
 The simplest approach we can take algorithmically is called independent learning.  This was first proposed as independent Q-learning back in 93 and the idea is that each agent simply learns independently with its own Q-function that conditions on its private observation history and individual action..  Nothing is centralised, there is no attempt to learn a joint value function that conditions on the joint action, and each agent essentially treats the other agents as if they were part of the environment.  \
 \
@@ -149,13 +97,13 @@ If we have centralised training, then an obvious improvement is to share paramet
 \
 Obviously this is a naive approach.  A key limitation is that because each agent treats other agents as part of its environment, if those agents are also learning, then the environment from that agent\'92s perspective becomes nonstationary and convergence guarantees go out the window.  In addition, because there\'92s no attempt learn a joint value function, the synergistic value of coordination is not represented making it hard to learn coordinated behaviour.\
 \
-15:\
+8:\
 \
 One way to do better is to take an actor-critic approach and centralise the critic.  So the critic conditions on the global state, the joint history, and maybe even the joint action.  Centralising the critic makes sense because it\'92s only needed during training.  Once you deploy, you can discard the critic and just use the policies to act.  Anything that you discard before deployment is a great candidate for centralisation.  \
 \
 This also makes explicit the motivation for an actor-critic approach.  Actor-critic methods are appealing anytime you have what I call a hard greedification problem, that is when finding the greedy action wrt the value function is nontrivial.  The classic example is continuous action spaces, and this is the typical setting in which actor-critic methods are used.  But here we have another hard greedification problem.  Because we have a centralised value function from which we need to derive decentralised policies.  Actor-critic methods can do that by having each actor incrementally update its policy by following a policy gradient estimated from the same centralised critic, as shown in the figure.\
 \
-16:\
+9:\
 \
 However, learning a centralised value function over a complex action space can be challenging.  A crucial idea to address this is to learn factored value functions instead.  Factored value functions have a long history in reinforcement learning and an even longer one in decision-theoretic planning.  The idea is to represent the value function as a sum of local value functions, each of which depends on the observations and actions of only a subset of the agents.  \
 \
@@ -163,11 +111,11 @@ This can be modelled in a coordination graph, which is just a factor graph where
 \
 Such a factorisation reduces the number of parameters to be learned, thereby speeding learning and improving generalisation.  It also makes it tractable to maximise over the joint action space, since your favourite message passing algorithms for performing MAP inference in probabilistic graphical models can be reused to efficiently find the maximising joint action.\
 \
-17:\
+10:\
 \
 DeepMind was the first to deep learn-ify this idea in an approach called value decomposition networks.  VDN uses the most extreme form of factorisation, with one factor per agent, yielding this disconnected factor graph.\
 \
-18:\
+11:\
 \
 While this is obviously a highly restrictive factorisation, it has an important side effect of enabling a total decentralisation of the max and argmax.  Because each factor involves only one agent, we can compute the max over joint actions by just performing a max over each agent\'92s individual action space separately and then summing them.\
 \
@@ -177,9 +125,9 @@ What this means is that with a VDN factorisation, we no longer have a hard greed
 \
 Here we have a DQN loss function where the Q-function is centralised.  Thanks to the VDN factorisation, this maximisation can be performed efficiently and, on deployment, action selection trivially decentralises since it requires only the decentralised argmax we just discussed.\
 \
-19:\
+12:\
 \
-Which brings us at last to QMIX.  The main idea was to try to preserve this handy property of decentralising the argmax, while loosening the restrictive representation imposed by VDN\'92s extreme factorisation.  We can do that by leveraging the simple observation that to preserve the decentralisability of the argmax, it suffices to enforce the condition that for all agents, the partial derivative of the joint value function with respect to that agent\'92s individual value function is nonnegative.\
+Which brings us at last to QMIX, a method we developed a few years ago that has proved quite useful in practice in this setting.  The main idea was to try to preserve this handy property of decentralising the argmax, while loosening the restrictive representation imposed by VDN\'92s extreme factorisation.  We can do that by leveraging the simple observation that to preserve the decentralisability of the argmax, it suffices to enforce the condition that for all agents, the partial derivative of the joint value function with respect to that agent\'92s individual value function is nonnegative.\
 \
 Now one potential source of confusion here is that because we\'92re considering discrete action spaces, these individual Q-values are only defined for a set of discrete points, so what does it even mean to take the derivative wrt it?\
 \
@@ -187,7 +135,7 @@ This figure illustrates what\'92s really happening.  When we compute the central
 \
  It\'92s this mixing function whose partial derivatives must be nonnegative in order to obey the monotonicity constraint.  In VDN the mixing function is just a summation but the point is that any monotonic function will do.  Of course, in practice, the mixing function is only ever supplied with a discrete set of inputs, corresponding to the individual Q-values for each agent\'92s actions, which, thanks to the monotonicity constraint, can be individually maximised over.\
 \
-20: \
+13: \
 \
 Now when the students first pitched this idea to me, I was pretty skeptical.  In fact, I was convinced it would never work. My reasoning was that if you preserve the decentralisability of the argmax, then you are still saddled with the key limitation of VDN: that it can\'92t represent the benefit of coordination.  By definition, if each agent can select its action in a vacuum then there can\'92t be any benefit to coordinating with other agents.\
 \
@@ -195,23 +143,23 @@ This point is illustrated in the normal form games shown here.  On the left we h
 \
 The question then becomes: should we care about games in the middle because it\'92s these games that QMIX can represent better than VDN.  My claim was not really, because even if VDN couldn\'92t represent the middle game exactly, it could approximate it with the value function from the left game, and when we perform greedy action selection we\'92d get exactly the same result as with QMIX.\
 \
-21:\
+14:\
 \
 The students however had an insight that I had overlooked.  Their point was that the value function is not just used for action selection, but also for bootstrapping.  The loss is a mean squared error between the Q-value and a target, and that target is computed by bootstrapping off the Q-value at the next state, as shown in red.  \
 \
 So even if a monotonic mixing function doesn\'92t select different actions than a linear mixing function in a given state, it can better estimate the value of that state, which results in less bootstrapping error and better action selection in earlier states.\
 \
-22:\
+15:\
 \
 This two-step game illustrates this point.  In the first step, the red agent\'92s action is irrelevant and the blue agent\'92s action determines whether in the second step they go to state 2A or 2B.  In 2A, the payoff is 7 regardless of their actions while in 2B the payoff is 8 but only if they both select the right action.\
 \
-23:\
+16:\
 \
 Let\'92s see what happens when we apply VDN and QMIX to this game.  VDN can accurately represent the value of 2A but not 2B.  In 2B, it correctly identifies the best action, but underestimates its value. Crucially, these errors in 2B propagate back via bootstrapping to result in errors in the value function for the first step, leading the blue agent to suboptimally choose to transition to 2A.  \
 \
 By contrast, QMIX can represent both 2A and 2B correctly which via bootstrapping leads to lower error in the value function for the first step, and so the blue agent optimally chooses to transition to 2B.\
 \
-24:\
+17:\
 \
 So how do we actually enforce the monotonicity constraint?  QMIX does so using three networks: an agent network, a mixing network, and a hypernetwork.  The middle part of the figure shows the basic setup: the agent networks, which share parameters, produce the individual Q-values.  These are then fed into the mixing network which is constrained to have nonnegative weights to ensure monotonicity and produces the joint Q-value.  \
 \
@@ -221,11 +169,11 @@ On the left is a closer look at the mixing network, whose weights are not learne
 \
 In the execution phase, we discard the mixing network and each agent selects actions greedily wrt its individual Q-values, which thanks to the monotonicity constraint, is guaranteed to maximise the joint Q-function.\
 \
-25:\
+18:\
 \
 Now in these plots we see the max over the estimated Q-values on nine random matrix games, for both QMIX and VDN, compared to the true max shown with the dashed line.  These plots show essentially that the students were right: QMIX is consistently better than VDN at approximating the max over Q-values, and this is the quantity that in a sequential setting would be used for bootstrapping.\
 \
-26:\
+19:\
 \
 Of course that\'92s just a sanity check.  For the proper evaluation of QMIX, we use the StarCraft Multi-Agent Challenge, or SMAC, a suite of cooperative multi-agent RL benchmark tasks we created based on the popular real-time strategy game StarCraft 2.\
 \
@@ -235,15 +183,15 @@ In StarCraft, human players compete against each other or against the game AI to
 \
 In SMAC, we want to benchmark Dec-POMDPs, so we focus on micromanagement, which is the fine-grained control of individual units and create a fully cooperative setting by fixing the opponent\'92s policy to that of the game AI.  Most importantly, there is no puppeteer but instead each unit is controlled by a separate agent.\
 \
-27:\
+20:\
 \
 As we know, to be truly multi-agent requires partial observability, which SMAC introduces by limiting the sight range of each agent, as shown in the figure.\
 \
-28:\
+21:\
 \
 SMAC consists of a number of different maps, shown here.  We have symmetric maps, where both teams have the same type and number of agents.   Then we have maps where both teams have the same type of agents but the opponent has more of them.  And finally we have asymmetric maps where the two teams have different types of agents.\
 \
-29:\
+22:\
 \
 The original QMIX paper just reported results on a few maps but now that we have SMAC, we can evaluate across all 14 maps.  I don\'92t want to bore you with dozens of plots so I\'92ll just show you this summary plot, which shows the number of maps out of 14 for which each method has the best performing policy at each point during training.  \
 \
@@ -255,7 +203,7 @@ The alternative methods include both independent Q-learning and VDN, as well as 
 \
 We\'92ve tried out a number of ideas to further improve performance on StarCraft, as have researchers in several other labs, but with mixed success as QMIX often proves surprisingly hard to beat, retaining competitive performance on a number of maps.  \
 \
-30:\
+23:\
 \
 Let\'92s take a closer look at the factors that contribute to QMIX\'92s performance.  Here are the results of some ablation experiments where we compare QMIX and VDN to QMIX-NS, in which the mixing network does not condition on the global state, and VDN-S, in which VDN includes a state-dependent bias in its linear mixing.  \
 \
@@ -263,15 +211,15 @@ The plots show the median test-win percentage across independent runs for each m
 \
 These results show that conditioning on the state is an important factor in performance, at least one some maps, and that doing so with a state-dependent bias is not as good as the more flexible approach in QMIX involving a hypernetwork.\
 \
-31:\
+24:\
 \
 And here we have another ablation experiment where we compare QMIX to QMIX-Lin, where the mixing function is restricted to be one linear layer.  Again we\'92re plotting median test win percentage.  As expected, the original QMIX with nonlinear mixing performs noticeably better.  \
 \
-32:\
+25:\
 \
 OK, but here\'92s where things get weird.  If we actually look at the learned mixing functions, they look very close to being linear.  We\'92ve done this analysis on a number of maps but I\'92m showing here just an example on the 2 colossi vs 64 zerglings maps because it\'92s obviously easier to visualise when there are only two agents.  The left shows the mixing function for the initial state and the right shows it for the state at time step 50.\
 \
-33:\
+26:\
 \
 So what is going on here?  To figure it out, we created yet another ablation called QMIX-2Lin, which like QMIX has two layers in its mixing function, but like QMIX-Lin has only linear layers.  \
 \
@@ -281,90 +229,21 @@ That\'92s what\'92s illustrated in this plot.  This not actually an RL experimen
 \
 You can see that QMIX-2Lin learns much faster than QMIX-Lin even though they both have linear mixing, and it even matches the performance of QMIX with nonlinear mixing.\
 \
-34:\
+27:\
 \
 And sure enough, this result holds up in SMAC when we actually do RL.  The performance of QMIX and QMIX-2Lin are quite similar and substantially better than that of QMIX-Lin when we again consider median test win percentage.\
 \
-35:\
+28:\
 \
 We can try to encourage QMIX to learn nonlinear mixing functions by changing the activation function from ELU to Tanh and indeed we do see more nonlinearity in the learned mixing functions, as shown at the top here.  However, as the bottom plots show, the effect on performance is modest at best.\
 \
-36:\
+29:\
 \
 So the takeaways from these experiments are...Value factorisation is highly effective in these tasks.  Flexibly conditioning on the state, not just using a state-dependent bias, is also important.  And it's important to richly parameterise the mixing function, as VDN or even QMIX with a single linear layer is not sufficient.  \
 \
 However, as much as we might wish it was otherwise, nonlinear mixing does not seem to be important, at least not in SMAC.\
 \
-37:\
-\
-So, now I have a confession to make.  Earlier when I said the entire talk would only be about one method, I was lying. Since I have a few moments left, I want to quickly tell you about another method we\'92ve developed, called MAVEN that is closely related to QMIX, and has actually shown improvement over it on a few maps.\
-\
-38:\
-\
-The motivation for MAVEN comes from the following plots.  The SMAC maps are divided into three categories, Easy, Hard, and Super Hard.  These plots show median test win percentage of the same methods we\'92ve been discussing, on the Super Hard maps and well, it\'92s an embarrassment, there\'92s no other way to put it.  On three of the five maps, all the methods completely flatline and on the other two, QMIX is the only one that makes any progress.\
-\
-39:\
-\
-One hypothesis as to what\'92s going on here is that these Super Hard maps are precisely the ones that require the kind of nonmonotonic mixing function that neither QMIX nor VDN can represent.  \
-\
-However, this raises a question: why does COMA also fail on these maps?  COMA uses a centralised but unfactored critic, so there\'92s no explicit mixing here but there are also no constraints on the kind of value function it can learn, assuming the network is adequately parameterised.  \
-\
-This leads to a second hypothesis: learning nonmonotonic mixing functions, whether explicitly or implicitly, requires smart exploration.  This is quite intuitive if you think about it.  If the value function really requires the agents to coordinate to get the best payoff, then that means they have to find a needle in the haystack of the joint action space, and this is a hard exploration problem.\
-\
-Note also that QMIX, like all the other methods we\'92ve discussed, uses naive exploration, in this case epsilon-greedy.  And this actually much worse than doing epsilon-greedy in a single-agent setting because each agent is separately performing its epsilon-weighted coin flips.  So what that means is that, for any reasonable value of epsilon, the chance of selecting a joint action where more than one or two agents deviate from the greedy joint action at the same time is vanishingly small.\
-\
-So it\'92s unsurprising that QMIX's performance is known to be sensitive to the epsilon annealing schedule.\
-\
-40: \
-\
-So Multi-Agent Variational Exploration, or MAVEN, is a method that builds on QMIX to address these limitations.  It does so by using a latent space to represent a diverse ensemble of monotonic approximations.  \
-\
-In each episode, a latent policy shown here, samples a value x which is encoded together with the initial state into the latent variable z.  z is then used by a team of QMIX-like agents whose agent and mixing networks condition on z.  \
-\
-The agent and mixing functions are optimised with a DQN loss just like in QMIX, while the latent policy is optimised using policy gradients. And additionally the agent trajectories are encoded in the hidden state of a GRU and a third loss term encourages learning to maximise a variational lower bound on the mutual information between the encoded trajectories and the latent variable z.  This encourage visitation of diverse trajectories while making them identifiable given z, thus separating the latent space into different exploration modes.\
-\
-So MAVEN can not only learn richer value function approximations by representing an ensemble of monotonic mixers, but it also greatly improves exploration because rather than just epsilon-dithering around the greedy joint action, it can perform committed exploration by fixing z for a whole episode, yielding the diverse trajectories needed to find that needle in the haystack.  \
-\
-41:\
-\
-These plots show how these enhancements pay off on the two Super Hard SMAC maps that we\'92ve tested MAVEN on.  These results are for 10m steps instead of 2m as in the earlier plots, which gives QMIX and sometimes IQL a chance to also make progress, but in both cases MAVEN\'92s performance is quite a bit stronger.\
-\
-42:\
-\
-We can also get some insight into what MAVEN is doing by looking at t-SNE plots of the initial state.  We then label each point a colour corresponding to the z value that MAVEN assigns to that state. Moving from left to right we see how those assignments change over time.\
-\
-At the top we have the 3s5z map which shows that MAVEN learns to assign a different z-value to each cluster of initial states.\
-\
-And at the bottom we have the Super Hard corridor map, where we see that MAVEN learns to shift assignment from a low-performing mode to a high-performing one, in contrast to QMIX which would just get stuck in a local optimum.\
-\
-43:\
-\
-If this work is of interest to you, I encourage to have a look at the papers for more details.  There\'92s the original QMIX paper from ICML-18 as well as an extended journal version which has been accepted to JMLR, but is already available on arxiv, and the MAVEN paper which was published at NeurIPS last year.\
-\
-44:\
-\
-In conclusion, QMIX is a simple, effective method for value factorisation in cooperative multi-agent RL\
-\
-Our empirical results make a pretty good case that such factorisation is crucial to performance\
-\
-However, one caveat is that the comparison between QMIX and COMA is confounded by the fact that factorisation of the value function is not the only difference between these two methods, as COMA is an on-policy actor-critic method and QMIX is an off-policy Q-learning method.\
-\
-Fortunately, we\'92ve recently developed a method that enables a more controlled comparison.  COMIX is a variant of QMIX that works with continuous actions, using a cross-entropy method to approximate the maximisation over continuous action space.   We can eliminate this confounder by comparing COMIX to Multi-Agent Deep Deterministic Policy Gradients or MADDPG, a method from OpenAI which is similar to COMA but uses continuous actions and is off-policy.  \
-\
-45:\
-\
-However, to make this comparison, we need a continuous action benchmark for cooperative MARL.  It turns out nothing suitable already existed so we created our own, called Multi-Agent Mujoco.  This consists of a set of traditional Mujoco robot control tasks that have been decentralised, such that a separate agent must control each of the robot\'92s joints.\
-\
-Our empirical results in this setting show that, with its factored value function, COMIX performs significantly better than MADDPG, whose centralised critic is not factored.  However, if we introduce a QMIX-style factorisation to MADDPG\'92s critic, which we call FacMADDPG, then the performance difference goes away.  So this suggests that it\'92s not that important whether you're on or off policy or whether your method is actor-critic or Q-learning, but factorisation of the value function is crucial.\
-\
-46:\
-\
-There\'92s a lot of innovation happening in the field right now, including new factorisations that go beyond QMIX.  In my group, we\'92re using tensor decompositions to flexibly factorise the joint Q-function.  New algorithms are being developed and some results coming soon show that PPO-based approaches can completely upend the state of the art in this area.  New architectures, as we start to explore the use of transformers for transfer and meta-learning across tasks with different numbers of agents and entities. And finally new applications as we move beyond SMAC to new challenges such as Google Research Football, a new benchmark that\'92s similar to the RoboCup simulation league but set up in a way that makes it easy to apply deep learning methods.  \
-\
-OK, that\'92s it.  Thanks very much for listening and if there\'92s any time left I\'92d be happy to answer any questions.\
-\
-\
-\
+OK, I\'92m going to turn it over to Tabish now who\'92s going to talk about how we can make QMIX even better.\
 \
 \
 \
